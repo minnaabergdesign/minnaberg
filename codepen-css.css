@@ -1,0 +1,196 @@
+/* CodePen CSS Settings > Add External CSS:
+   https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap
+   OR replace with your Adobe Typekit URL for Kudryashev
+*/
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #0e0d0b;
+  color: #f0ede6;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* CURSOR */
+#cur {
+  position: fixed;
+  width: 9px; height: 9px;
+  background: #f0ede6;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+/* NAV */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 36px;
+  z-index: 200;
+  pointer-events: none;
+}
+header a {
+  font-size: 13px;
+  color: #f0ede6;
+  text-decoration: none;
+  pointer-events: all;
+  cursor: none;
+  letter-spacing: -0.01em;
+}
+header a.dim { opacity: 0.35; transition: opacity 0.2s; }
+header a.dim:hover { opacity: 1; }
+
+/* FLOATING IMAGE — follows mouse via JS */
+#fimg {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  width: 480px;
+  height: 336px;
+  top: 0; left: 0;
+  will-change: transform, opacity;
+}
+#fimg img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+#fimg img.show { display: block; }
+
+/* TRACK — native scroll */
+#track {
+  display: flex;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#track::-webkit-scrollbar { display: none; }
+#track { scrollbar-width: none; }
+
+/* COLUMN */
+.col {
+  flex-shrink: 0;
+  width: 40vw;
+  min-width: 300px;
+  height: 100vh;
+  border-right: 1px solid rgba(240,237,230,.07);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 72px;
+  cursor: none;
+}
+.col:first-child { border-left: 1px solid rgba(240,237,230,.07); }
+
+.num {
+  position: absolute;
+  top: 26px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(240,237,230,.15);
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-family: "Clash Display", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+  font-size: clamp(52px, 9.5vw, 114px);
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  color: rgba(240,237,230,.18);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  padding: 0 0 0 28px;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  transition: color 0.3s ease, transform 0.5s cubic-bezier(.23,1,.32,1);
+  user-select: none;
+}
+.col.on .title {
+  color: #f0ede6;
+  transform: rotate(180deg) translateY(-8px);
+}
+
+.tags {
+  padding: 18px 24px 80px;
+  font-size: 10px;
+  color: rgba(240,237,230,.15);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.9;
+  border-top: 1px solid rgba(240,237,230,.07);
+  transition: color 0.3s;
+}
+.col.on .tags { color: rgba(240,237,230,.35); }
+
+/* END CAP */
+.end {
+  flex-shrink: 0;
+  width: 34vw;
+  min-width: 260px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 48px 52px;
+}
+.end-h {
+  font-family: "Clash Display", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 50px);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: #f0ede6;
+  margin-bottom: 12px;
+}
+.end-sub {
+  font-size: 12px;
+  color: rgba(240,237,230,.3);
+  font-style: italic;
+  margin-bottom: 32px;
+}
+.end-links { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.end-links a {
+  font-size: 12px;
+  color: rgba(240,237,230,.3);
+  text-decoration: none;
+  cursor: none;
+  transition: color 0.2s;
+}
+.end-links a:hover { color: #f0ede6; }
+.end-copy { font-size: 10px; color: rgba(240,237,230,.12); letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* BOTTOM */
+footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 13px 36px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(240,237,230,.12);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 200;
+  pointer-events: none;
+  border-top: 1px solid rgba(240,237,230,.07);
+}
