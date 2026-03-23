@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>mmaberg.com — test</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+/* mmaberg.com — CSS panel
+   External CSS to add in CodePen settings:
+   https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap
+*/
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:    #0e0d0b;
+  --ink:   #f0ede6;
+  --mid:   rgba(240,237,230,.32);
+  --faint: rgba(240,237,230,.13);
+  --rule:  rgba(240,237,230,.08);
+  --clash: "Clash Display","Helvetica Neue",Arial,sans-serif;
+  --haas:  "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--haas);
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* ── CURSOR
+   JS sets left/top directly — margin centers the dot on the pointer ── */
+#cur {
+  position: fixed;
+  width: 9px;
+  height: 9px;
+  background: var(--ink);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  margin: -4px 0 0 -4px;
+  will-change: left, top;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 36px;
+  z-index: 100;
+  pointer-events: none;
+}
+.nav-name {
+  font-family: var(--haas);
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: none;
+  pointer-events: all;
+  cursor: none;
+}
+.nav-about {
+  font-family: var(--haas);
+  font-size: 13px;
+  color: var(--mid);
+  text-decoration: none;
+  pointer-events: all;
+  cursor: none;
+  transition: color .25s;
+}
+.nav-about:hover { color: var(--ink); }
+
+/* ── FLOATING IMAGE
+   Position is fixed top/left 0. JS applies transform: translate(x,y)
+   and sets opacity via spring — do NOT set opacity here ── */
+.fimg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform, opacity;
+  /* opacity controlled entirely by JS spring — starts at 0 via spring init */
+}
+.fi {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.fi.show { opacity: 1; }
+
+/* ── TRACK ── */
+.track {
+  display: flex;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  user-select: none;
+}
+.track::-webkit-scrollbar { display: none; }
+
+/* ── COLUMN ── */
+.col {
+  flex-shrink: 0;
+  width: 40vw;
+  min-width: 320px;
+  height: 100vh;
+  border-right: 1px solid var(--rule);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 72px;
+  cursor: none;
+  /* NO transform here — stagger is handled by opacity only to avoid
+     fighting with col-title's rotate(180deg) transform */
+}
+.col:first-child { border-left: 1px solid var(--rule); }
+
+.col-num {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--haas);
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: .08em;
+  transition: color .3s;
+}
+.col.hov .col-num { color: var(--mid); }
+
+/* Title: writing-mode needs rotate(180deg). Hover lift via translateY.
+   These are on the child element, NOT the parent .col ── */
+.col-title {
+  font-family: var(--clash);
+  font-weight: 600;
+  font-size: clamp(52px, 9.5vw, 116px);
+  line-height: .86;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg) translateY(0px);
+  padding: 0 0 0 28px;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  transition: opacity .3s ease, transform .55s cubic-bezier(.23,1,.32,1);
+}
+.track.hovering .col-title          { opacity: .1; }
+.track.hovering .col.hov .col-title {
+  opacity: 1;
+  transform: rotate(180deg) translateY(-10px);
+}
+
+.col-tags {
+  padding: 18px 24px 22px;
+  font-family: var(--haas);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  line-height: 1.9;
+  border-top: 1px solid var(--rule);
+  transition: opacity .3s ease;
+}
+.track.hovering .col-tags         { opacity: .3; }
+.track.hovering .col.hov .col-tags { opacity: 1; }
+
+/* ── END CAP ── */
+.end-col {
+  flex-shrink: 0;
+  width: 36vw;
+  min-width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 52px 56px;
+}
+.end-statement {
+  font-family: var(--clash);
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 50px);
+  letter-spacing: -.04em;
+  line-height: .9;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.end-sub {
+  font-family: var(--haas);
+  font-size: 12px;
+  color: var(--mid);
+  font-style: italic;
+  letter-spacing: .02em;
+  margin-bottom: 36px;
+}
+.end-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.end-links a {
+  font-family: var(--haas);
+  font-size: 12px;
+  color: var(--mid);
+  text-decoration: none;
+  cursor: none;
+  transition: color .2s;
+}
+.end-links a:hover { color: var(--ink); }
+.end-copy {
+  font-family: var(--haas);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* ── BOTTOM STRIP ── */
+.bottom-strip {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 36px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--haas);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  z-index: 100;
+  pointer-events: none;
+  border-top: 1px solid var(--rule);
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+
+<nav>
+  <a href="#">Minna-Maaria Åberg</a>
+  <a href="#" class="dim">About</a>
+</nav>
+
+<div class="fimg" id="fimg">
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/58fc8e39-ed76-497a-b473-17d1f09e9cd6_carw_202x158x1920.png" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/795943bb-12ad-41fd-b689-93f70e541e55_rwc_270x0x1381x1080x1920.jpg" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/4286b9a4-de2a-4b29-8104-472d5cd83604_carw_202x158x1920.png" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/e0ad0fd9-00b4-4d47-b025-d41574061031_carw_202x158x1920.png" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/4a7e221d-43c2-49db-bd7f-4e70a8415a64_car_202x158.png" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/539a518a-2456-4dc7-9c31-27f3f084641d_car_202x158.jpg" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/d7c0d053-2816-4f40-a527-c951f968c830_carw_202x158x1920.png" src="" alt="" referrerpolicy="no-referrer"/>
+  <img class="fi" data-src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/b182f602-7e4e-4553-bb51-fd1b00633f30_carw_202x158x1920.png" src="" alt="" referrerpolicy="no-referrer"/>
+</div>
+
+<div class="track" id="track">
+  <div class="col" data-i="0"><span class="col-num">01</span><div class="col-title">LUKHANG TEMPLE</div><div class="col-tags">Architectural Visualisation<br>3D · Blender · 2024</div></div>
+  <div class="col" data-i="1"><span class="col-num">02</span><div class="col-title">IMMERSIVE ENVIRONMENTS</div><div class="col-tags">Expo Design · Brand<br>BOSS · 2023</div></div>
+  <div class="col" data-i="2"><span class="col-num">03</span><div class="col-title">3D & ANIMATION</div><div class="col-tags">Motion · Digital Sculpture<br>Blender · 2023</div></div>
+  <div class="col" data-i="3"><span class="col-num">04</span><div class="col-title">MODERN GENIE</div><div class="col-tags">3D Character · Sculpture<br>Midjourney · 2024</div></div>
+  <div class="col" data-i="4"><span class="col-num">05</span><div class="col-title">RIVER CHAIR</div><div class="col-tags">Biomimicry · Wood<br>Angers Brut · 2019</div></div>
+  <div class="col" data-i="5"><span class="col-num">06</span><div class="col-title">KAIKU SPEAKER</div><div class="col-tags">Industrial Design<br>Solidworks · 2017</div></div>
+  <div class="col" data-i="6"><span class="col-num">07</span><div class="col-title">PRACTICAL AI</div><div class="col-tags">Midjourney · AI Design<br>Digital Art · 2023</div></div>
+  <div class="col" data-i="7"><span class="col-num">08</span><div class="col-title">GRAPHIC DESIGN</div><div class="col-tags">Visual Communication<br>Brand Identity · 2017</div></div>
+  <div class="end-col">
+    <div class="end-statement">MUOTOILEN<br>NÄKYMÄTTÖMÄSTÄ<br>NÄKYVÄÄ.</div>
+    <div class="end-sub">Shaping the unseen.</div>
+    <nav class="end-links">
+      <a href="https://www.linkedin.com/in/minna-maaria-åberg/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/abergds/" target="_blank">Instagram</a>
+      <a href="mailto:minna-maaria.aberg@gmail.com">minna-maaria.aberg@gmail.com</a>
+    </nav>
+    <div class="end-copy">© 2026 mmaberg.com</div>
+  </div>
+</div>
+
+<div class="bottom-strip">
+  <span>Muotoilija AMK · Helsinki · Finland</span>
+  <span>3D · Spatial · AR · VR · Available 2026</span>
+</div><script>
+/* mmaberg.com — JS panel for CodePen
+   No external libraries needed.
+*/
+(function () {
+  "use strict";
+
+  /* ── CURSOR ── */
+  var cur = document.getElementById("cur");
+  document.addEventListener("mousemove", function (e) {
+    cur.style.left = e.clientX + "px";
+    cur.style.top  = e.clientY + "px";
+  });
+
+  /* ── SPRING helper ── */
+  function Spring(k, d) {
+    this.val = 0; this.vel = 0; this.target = 0;
+    this.k = k; this.d = d;
+  }
+  Spring.prototype.tick = function () {
+    this.vel = (this.vel + (this.target - this.val) * this.k) * this.d;
+    this.val += this.vel;
+    return this.val;
+  };
+
+  /* ── PRELOAD IMAGES ── */
+  document.querySelectorAll(".fi[data-src]").forEach(function (img) {
+    var src = img.getAttribute("data-src");
+    var t   = new Image();
+    t.referrerPolicy = "no-referrer";
+    t.onload  = function () { img.referrerPolicy = "no-referrer"; img.src = src; };
+    t.onerror = function () { img.src = src; };
+    t.src = src;
+  });
+
+  /* ── REFS ── */
+  var track = document.getElementById("track");
+  var fimg  = document.getElementById("fimg");
+  var cols  = document.querySelectorAll(".col");
+  var imgs  = document.querySelectorAll(".fi");
+
+  /* ── IMAGE SIZE ── */
+  var imgW = Math.min(window.innerWidth * 0.4, 580);
+  var imgH = imgW * 0.7;
+  fimg.style.width  = imgW + "px";
+  fimg.style.height = imgH + "px";
+
+  /* ── SPRINGS: x, y position + opacity ── */
+  var sx = new Spring(0.1,  0.76);
+  var sy = new Spring(0.1,  0.76);
+  var so = new Spring(0.12, 0.80);
+  /* start springs at screen centre */
+  sx.val = sx.target = window.innerWidth  / 2;
+  sy.val = sy.target = window.innerHeight / 2;
+  so.val = so.target = 0;
+
+  var mouseX  = window.innerWidth  / 2;
+  var mouseY  = window.innerHeight / 2;
+  var hovering = false;
+  var active   = -1;
+
+  document.addEventListener("mousemove", function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  /* ── ANIMATION LOOP ── */
+  function loop() {
+    requestAnimationFrame(loop);
+
+    /* update spring targets */
+    if (hovering) {
+      /* clamp so image stays on screen */
+      sx.target = Math.min(Math.max(mouseX, imgW  / 2 + 16), window.innerWidth  - imgW  / 2 - 16);
+      sy.target = Math.min(Math.max(mouseY, imgH / 2 + 16), window.innerHeight - imgH / 2 - 16);
+      so.target = 1;
+    } else {
+      so.target = 0;
+    }
+
+    var x = sx.tick();
+    var y = sy.tick();
+    var o = Math.max(0, Math.min(1, so.tick()));
+
+    /* translate from top-left 0,0 — offset by half size to centre on cursor */
+    fimg.style.transform = "translate(" + (x - imgW / 2) + "px," + (y - imgH / 2) + "px)";
+    fimg.style.opacity   = o.toFixed(3);
+  }
+  requestAnimationFrame(loop);
+
+  /* ── HOVER SHOW / HIDE ── */
+  function showProject(i) {
+    if (i === active) return;
+    active   = i;
+    hovering = true;
+    imgs.forEach(function (img, j) { img.classList.toggle("show", j === i); });
+    cols.forEach(function (col, j) { col.classList.toggle("hov",  j === i); });
+    track.classList.add("hovering");
+  }
+
+  function hideProject() {
+    active   = -1;
+    hovering = false;
+    imgs.forEach(function (img) { img.classList.remove("show"); });
+    cols.forEach(function (col) { col.classList.remove("hov"); });
+    track.classList.remove("hovering");
+  }
+
+  cols.forEach(function (col, i) {
+    col.addEventListener("mouseenter", function () { showProject(i); });
+  });
+  track.addEventListener("mouseleave", hideProject);
+
+  /* ── PAGE LOAD STAGGER (opacity only — no transform conflict) ── */
+  var allItems = document.querySelectorAll(".col, .end-col, nav, .bottom-strip");
+  allItems.forEach(function (el, i) {
+    el.style.opacity    = "0";
+    el.style.transition = "opacity .6s ease " + (i * 0.055 + 0.08) + "s";
+  });
+  /* trigger on next two frames to ensure styles are applied first */
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      allItems.forEach(function (el) { el.style.opacity = "1"; });
+    });
+  });
+
+  /* ── DRAG TO SCROLL ── */
+  var dragging    = false;
+  var dragStartX  = 0;
+  var dragScroll  = 0;
+  var dragMoved   = false;
+
+  track.addEventListener("mousedown", function (e) {
+    dragging   = true;
+    dragMoved  = false;
+    dragStartX = e.pageX - track.offsetLeft;
+    dragScroll = track.scrollLeft;
+  });
+  document.addEventListener("mousemove", function (e) {
+    if (!dragging) return;
+    var dx = (e.pageX - track.offsetLeft - dragStartX) * 1.7;
+    if (Math.abs(dx) > 5) dragMoved = true;
+    track.scrollLeft = dragScroll - dx;
+  });
+  document.addEventListener("mouseup", function () { dragging = false; });
+  track.addEventListener("click", function (e) { if (dragMoved) e.preventDefault(); });
+
+  /* ── WHEEL → HORIZONTAL ── */
+  track.addEventListener("wheel", function (e) {
+    if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+      e.preventDefault();
+      track.scrollLeft += e.deltaY * 1.4;
+    }
+  }, { passive: false });
+
+  /* ── KEYBOARD ── */
+  document.addEventListener("keydown", function (e) {
+    var step = window.innerWidth * 0.4;
+    if (e.key === "ArrowRight") track.scrollLeft += step;
+    if (e.key === "ArrowLeft")  track.scrollLeft -= step;
+  });
+
+  /* ── RESIZE ── */
+  window.addEventListener("resize", function () {
+    imgW = Math.min(window.innerWidth * 0.4, 580);
+    imgH = imgW * 0.7;
+    fimg.style.width  = imgW + "px";
+    fimg.style.height = imgH + "px";
+  });
+
+}());
+</script>
+</body>
+</html>
