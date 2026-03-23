@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Minna-Maaria Åberg — mmaberg.com</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #0e0d0b;
+  color: #f0ede6;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* LOGO CURSOR */
+#logo-cur {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  z-index: 9999;
+  top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+#logo-cur img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  filter: invert(1);
+}
+
+/* NAV */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 36px;
+  z-index: 200;
+  pointer-events: none;
+}
+header a {
+  font-size: 13px;
+  color: #f0ede6;
+  text-decoration: none;
+  pointer-events: all;
+  letter-spacing: -0.01em;
+}
+header a.dim { opacity: 0.35; transition: opacity 0.2s; }
+header a.dim:hover { opacity: 1; }
+
+/* FLOATING IMAGE — centred over hovered column, above everything */
+#img-panel {
+  position: fixed;
+  z-index: 150;
+  pointer-events: none;
+  width: 42vw;
+  max-width: 560px;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.23,1,.32,1),
+              left 0.5s cubic-bezier(.23,1,.32,1), top 0.5s cubic-bezier(.23,1,.32,1);
+  top: 50%;
+  left: 50%;
+}
+#img-panel.show {
+  opacity: 1;
+  transform: scale(1);
+}
+#img-panel img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+#img-panel img.show { display: block; }
+
+/* TRACK — native scroll */
+#track {
+  display: flex;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  position: relative;
+}
+#track::-webkit-scrollbar { display: none; }
+#track { scrollbar-width: none; }
+
+/* COLUMN */
+.col {
+  flex-shrink: 0;
+  width: 40vw;
+  min-width: 300px;
+  height: 100vh;
+  border-right: 1px solid rgba(240,237,230,.07);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 72px;
+  background: #0e0d0b;
+}
+.col:first-child { border-left: 1px solid rgba(240,237,230,.07); }
+
+
+.num {
+  position: absolute;
+  top: 26px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(240,237,230,.15);
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+.col.on .num { color: rgba(240,237,230,.4); }
+
+.title {
+  font-family: "Clash Display", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+  font-size: clamp(52px, 9.5vw, 114px);
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  color: rgba(240,237,230,.18);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg) translateY(0px);
+  padding: 0 0 0 28px;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  transition: color 0.3s ease, transform 0.5s cubic-bezier(.23,1,.32,1);
+  user-select: none;
+}
+.col.on .title {
+  color: #f0ede6;
+  transform: rotate(180deg) translateY(-8px);
+}
+
+.tags {
+  padding: 18px 24px 80px;
+  font-size: 10px;
+  color: rgba(240,237,230,.15);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.9;
+  border-top: 1px solid rgba(240,237,230,.07);
+  transition: color 0.3s;
+}
+.col.on .tags { color: rgba(240,237,230,.4); }
+
+/* END CAP */
+.end {
+  flex-shrink: 0;
+  width: 34vw;
+  min-width: 260px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 48px 52px;
+  background: #0e0d0b;
+}
+.end-h {
+  font-family: "Clash Display", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 50px);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: #f0ede6;
+  margin-bottom: 12px;
+}
+.end-sub { font-size: 12px; color: rgba(240,237,230,.3); font-style: italic; margin-bottom: 32px; }
+.end-links { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.end-links a { font-size: 12px; color: rgba(240,237,230,.3); text-decoration: none; transition: color 0.2s; }
+.end-links a:hover { color: #f0ede6; }
+.end-copy { font-size: 10px; color: rgba(240,237,230,.12); letter-spacing: 0.05em; text-transform: uppercase; }
+
+footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 13px 36px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(240,237,230,.12);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 200;
+  pointer-events: none;
+  border-top: 1px solid rgba(240,237,230,.07);
+}
+</style>
+</head>
+<body>
+
+<div id="logo-cur"><img src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/76644d75-9dd3-460d-b5e6-bcc25aecbc20_rwc_0x0x2697x2198x4096.png?h=41946be9d6ad1ed143baad51b92f6780" referrerpolicy="no-referrer"/></div>
+
+<header>
+  <a href="#">Minna-Maaria Åberg</a>
+  <a href="#" class="dim">About</a>
+</header>
+
+<!-- Fixed image panel behind the scroll track -->
+<div id="img-panel">
+  <img id="fi0" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/58fc8e39-ed76-497a-b473-17d1f09e9cd6_carw_202x158x1920.png" referrerpolicy="no-referrer"/>
+  <img id="fi1" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/795943bb-12ad-41fd-b689-93f70e541e55_rwc_270x0x1381x1080x1920.jpg" referrerpolicy="no-referrer"/>
+  <img id="fi2" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/4286b9a4-de2a-4b29-8104-472d5cd83604_carw_202x158x1920.png" referrerpolicy="no-referrer"/>
+  <img id="fi3" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/e0ad0fd9-00b4-4d47-b025-d41574061031_carw_202x158x1920.png" referrerpolicy="no-referrer"/>
+  <img id="fi4" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/4a7e221d-43c2-49db-bd7f-4e70a8415a64_car_202x158.png" referrerpolicy="no-referrer"/>
+  <img id="fi5" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/539a518a-2456-4dc7-9c31-27f3f084641d_car_202x158.jpg" referrerpolicy="no-referrer"/>
+  <img id="fi6" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/d7c0d053-2816-4f40-a527-c951f968c830_carw_202x158x1920.png" referrerpolicy="no-referrer"/>
+  <img id="fi7" src="https://cdn.myportfolio.com/4c84a1d98aa47aa6a6ff1e21b2321707/b182f602-7e4e-4553-bb51-fd1b00633f30_carw_202x158x1920.png" referrerpolicy="no-referrer"/>
+</div>
+
+<div id="track">
+  <div class="col" data-i="0"><span class="num">01</span><div class="title">LUKHANG TEMPLE</div><div class="tags">Architectural Vis.<br>3D · Blender · 2024</div></div>
+  <div class="col" data-i="1"><span class="num">02</span><div class="title">IMMERSIVE ENVIRONMENTS</div><div class="tags">Expo Design · Brand<br>BOSS · 2023</div></div>
+  <div class="col" data-i="2"><span class="num">03</span><div class="title">3D &amp; ANIMATION</div><div class="tags">Motion · Sculpture<br>Blender · 2023</div></div>
+  <div class="col" data-i="3"><span class="num">04</span><div class="title">MODERN GENIE</div><div class="tags">3D Character<br>Midjourney · 2024</div></div>
+  <div class="col" data-i="4"><span class="num">05</span><div class="title">RIVER CHAIR</div><div class="tags">Biomimicry · Wood<br>Angers Brut · 2019</div></div>
+  <div class="col" data-i="5"><span class="num">06</span><div class="title">KAIKU SPEAKER</div><div class="tags">Industrial Design<br>Solidworks · 2017</div></div>
+  <div class="col" data-i="6"><span class="num">07</span><div class="title">PRACTICAL AI</div><div class="tags">Midjourney · AI<br>Digital Art · 2023</div></div>
+  <div class="col" data-i="7"><span class="num">08</span><div class="title">GRAPHIC DESIGN</div><div class="tags">Visual Communication<br>Brand · 2017</div></div>
+  <div class="end">
+    <div class="end-h">MUOTOILEN<br>NÄKYMÄTTÖMÄSTÄ<br>NÄKYVÄÄ.</div>
+    <div class="end-sub">Shaping the unseen.</div>
+    <div class="end-links">
+      <a href="https://www.linkedin.com/in/minna-maaria-åberg/" target="_blank">LinkedIn</a>
+      <a href="https://www.instagram.com/abergds/" target="_blank">Instagram</a>
+      <a href="mailto:minna-maaria.aberg@gmail.com">minna-maaria.aberg@gmail.com</a>
+    </div>
+    <div class="end-copy">© 2026 mmaberg.com</div>
+  </div>
+</div>
+
+<footer>
+  <span>Muotoilija AMK · Helsinki · Finland</span>
+  <span>3D · Spatial · AR · VR · Available 2026</span>
+</footer>
+
+<script>
+(function () {
+  /* LOGO CURSOR */
+  var logoCur = document.getElementById('logo-cur');
+  document.addEventListener('mousemove', function(e) {
+    logoCur.style.transform = 'translate(' + (e.clientX - 24) + 'px,' + (e.clientY - 24) + 'px)';
+  });
+
+  var track = document.getElementById('track');
+  var cols  = document.querySelectorAll('.col');
+  var imgs  = document.querySelectorAll('#img-panel img');
+  var active = -1;
+
+  var panel = document.getElementById('img-panel');
+  var IW = panel.offsetWidth  || window.innerWidth * 0.42;
+  var IH = panel.offsetHeight || IW * 0.75;
+
+  function positionOver(col) {
+    var r = col.getBoundingClientRect();
+    var cx = r.left + r.width  / 2;
+    var cy = r.top  + r.height / 2;
+    /* clamp so image stays on screen */
+    var left = Math.min(Math.max(cx - IW/2, 16), window.innerWidth  - IW - 16);
+    var top  = Math.min(Math.max(cy - IH/2, 16), window.innerHeight - IH - 16);
+    panel.style.left = left + 'px';
+    panel.style.top  = top  + 'px';
+  }
+
+  /* HOVER — mouseenter/mouseleave directly on columns */
+  cols.forEach(function(col, i) {
+    col.addEventListener('mouseenter', function() {
+      if (active === i) return;
+      active = i;
+      cols.forEach(function(c, j) { c.classList.toggle('on', j === i); });
+      imgs.forEach(function(img, j) { img.classList.toggle('show', j === i); });
+      positionOver(col);
+      panel.classList.add('show');
+    });
+    col.addEventListener('mouseleave', function() {
+      active = -1;
+      col.classList.remove('on');
+      imgs[i].classList.remove('show');
+      panel.classList.remove('show');
+    });
+  });
+
+  /* WHEEL → horizontal */
+  track.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    track.scrollLeft += d;
+  }, { passive: false });
+
+  /* DRAG */
+  var dn = false, dsx = 0, dsl = 0;
+  track.addEventListener('mousedown', function(e) { dn=true; dsx=e.clientX; dsl=track.scrollLeft; });
+  document.addEventListener('mousemove', function(e) {
+    if (!dn) return;
+    track.scrollLeft = dsl - (e.clientX - dsx) * 1.4;
+  });
+  document.addEventListener('mouseup', function() { dn = false; });
+
+  /* KEYBOARD */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') track.scrollLeft += innerWidth * .38;
+    if (e.key === 'ArrowLeft')  track.scrollLeft -= innerWidth * .38;
+  });
+
+  /* PAGE LOAD STAGGER */
+  var els = document.querySelectorAll('.col, .end');
+  var hdr = document.querySelector('header');
+  var ftr = document.querySelector('footer');
+  els.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition =
+      'opacity .6s ease '+(i*.06+.1)+'s,' +
+      'transform .6s cubic-bezier(.23,1,.32,1) '+(i*.06+.1)+'s';
+  });
+  [hdr, ftr].forEach(function(el) {
+    if (!el) return;
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .5s ease .05s';
+  });
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      els.forEach(function(el) { el.style.opacity='1'; el.style.transform='translateY(0)'; });
+      [hdr, ftr].forEach(function(el) { if (el) el.style.opacity='1'; });
+    });
+  });
+
+}());
+</script>
+</body>
+</html>
